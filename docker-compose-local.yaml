@@ -1,0 +1,14 @@
+version: "3.3"
+services:
+  test:
+    volumes:
+      - ".:/weather"
+    command: python3 -m http.server 6000
+  db:
+    ports:
+        - "5432:5432"
+    networks:
+        - custom
+networks:
+  custom:
+    driver: bridge
