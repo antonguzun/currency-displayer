@@ -18,7 +18,7 @@ class CurrencyUpdaterActionError(Exception):
         return f"{self.__class__.__name__}. Nested Error: {self.nested_error}"
 
 
-class CurrencyUpdaterAction:
+class CurrencyUpdaterActionPipeline:
     def __init__(self, resources: Resources):
         self.resources = resources
 
@@ -41,12 +41,12 @@ class CurrencyUpdaterAction:
         logger.info("currency rates updated")
 
 
-class CurrencyUpdater:
-    action: CurrencyUpdaterAction
+class CurrencyUpdaterWorker:
+    action: CurrencyUpdaterActionPipeline
 
     def __init__(self, resources: Resources):
         self.resources = resources
-        self.action = CurrencyUpdaterAction(resources)
+        self.pipeline = CurrencyUpdaterActionPipeline(resources)
 
     async def run(self):
         try:
@@ -56,7 +56,7 @@ class CurrencyUpdater:
             while True:
                 logger.debug(f"try to get {target_symbols.keys()}")
                 try:
-                    await self.action(target_symbols)
+                    await self.pipeline(target_symbols)
                 except CurrencyUpdaterActionError as e:
                     logger.error(e)
                 await asyncio.sleep(1)

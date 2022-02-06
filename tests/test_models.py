@@ -47,5 +47,6 @@ async def test_asset_history(pool: Pool):
     assert histories[0] == history
     assert history.id == record_id
     assert history.asset_id == asset_id
+    assert history.asset_name == assets[0].symbol
     assert history.value == expected_value
     assert history.created_at == now

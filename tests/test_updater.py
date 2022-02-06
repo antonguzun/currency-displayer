@@ -3,12 +3,9 @@ from unittest.mock import patch
 
 import pytest
 
-from src import settings
-from src.clients import RateJsonFXCMClient
 from src.models import AssetHistory, FinancialAsset
-from src.resources import Resources
-from src.workers.currency_updater import CurrencyUpdaterAction
-from tests.vars.rates import CLIENT_RESPONSE, RAW_RATES
+from src.workers.currency_updater import CurrencyUpdaterActionPipeline
+from tests.vars.rates import CLIENT_RESPONSE
 
 
 @pytest.mark.usefixtures("clean_table")
@@ -22,7 +19,7 @@ async def test_updater(client, pool, resources):
     target_assets = await FinancialAsset.get_assets(pool)
     target_symbols = {asset.symbol: asset for asset in target_assets}
 
-    action = CurrencyUpdaterAction(resources)
+    action = CurrencyUpdaterActionPipeline(resources)
     await action(target_symbols)
 
     point_count = await pool.fetchval("SELECT count(1) FROM asset_history")

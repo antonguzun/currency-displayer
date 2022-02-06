@@ -36,21 +36,25 @@ class FinancialAsset(BaseModel):
 class AssetHistory(BaseModel):
     id: int
     asset_id: int
+    asset_name: str
     value: Decimal
     created_at: datetime
 
     _get_assets_after_query = """
-        SELECT id, asset_id, value, created_at 
-        FROM asset_history 
+        SELECT ah.id, asset_id, fa.symbol as asset_name, value, ah.created_at 
+        FROM asset_history ah
+        LEFT JOIN financial_assets fa ON asset_id = fa.id
         WHERE asset_id = $1
-        AND created_at > $2
+        AND ah.created_at > $2
+        ORDER BY ah.created_at ASC
     """
 
     _get_last_assets_query = """
-        SELECT id, asset_id, value, created_at 
-        FROM asset_history 
+        SELECT ah.id, asset_id, fa.symbol as asset_name, value, ah.created_at 
+        FROM asset_history ah
+        LEFT JOIN financial_assets fa ON asset_id = fa.id
         WHERE asset_id = $1
-        ORDER BY created_at DESC
+        ORDER BY ah.created_at DESC
         LIMIT 1
     """
 

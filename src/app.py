@@ -10,7 +10,7 @@ from src import settings
 from src.clients import RateJsonFXCMClient
 from src.handlers import ping, websocket_handler
 from src.resources import Resources
-from src.workers.currency_updater import CurrencyUpdater
+from src.workers.currency_updater import CurrencyUpdaterWorker
 
 
 async def create_pool(app) -> asyncpg.Pool:
@@ -49,7 +49,7 @@ def register_routers(app):
 
 
 async def start_background_tasks(app):
-    updater = CurrencyUpdater(app.resources)
+    updater = CurrencyUpdaterWorker(app.resources)
     app["currency_updater"] = asyncio.create_task(updater.run())
 
 
