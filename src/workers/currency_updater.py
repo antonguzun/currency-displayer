@@ -49,13 +49,17 @@ class CurrencyUpdater:
         self.action = CurrencyUpdaterAction(resources)
 
     async def run(self):
-        logger.info(f"start {self.__class__.__name__}")
-        target_assets = await FinancialAsset.get_assets(self.resources.db_pool)
-        target_symbols = {asset.symbol: asset for asset in target_assets}
-        while True:
-            logger.debug(f"try to get {target_symbols.keys()}")
-            try:
-                await self.action(target_symbols)
-            except CurrencyUpdaterActionError as e:
-                logger.error(e)
-            await asyncio.sleep(1)
+        try:
+            logger.info(f"start {self.__class__.__name__}")
+            target_assets = await FinancialAsset.get_assets(self.resources.db_pool)
+            target_symbols = {asset.symbol: asset for asset in target_assets}
+            while True:
+                logger.debug(f"try to get {target_symbols.keys()}")
+                try:
+                    await self.action(target_symbols)
+                except CurrencyUpdaterActionError as e:
+                    logger.error(e)
+                await asyncio.sleep(1)
+        except KeyboardInterrupt:
+            logger.info("stop updating currencies")
+            return

@@ -8,7 +8,7 @@ from aiohttp import web
 
 from src import settings
 from src.clients import RateJsonFXCMClient
-from src.handlers import ping
+from src.handlers import ping, websocket_handler
 from src.resources import Resources
 from src.workers.currency_updater import CurrencyUpdater
 
@@ -45,6 +45,7 @@ async def cleanup_app_objects(app):
 
 def register_routers(app):
     app.router.add_get("/ping", ping)
+    app.router.add_get("/", websocket_handler)
 
 
 async def start_background_tasks(app):
