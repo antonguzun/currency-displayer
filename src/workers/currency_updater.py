@@ -1,13 +1,21 @@
 import asyncio
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from decimal import Decimal
-from typing import List
 
 from loguru import logger
 
+from src.clients import ApiError
 from src.models import AssetHistory, FinancialAsset
 from src.resources import Resources
-from tests.vars.rates import RATES  # TODO не забыть имплементировать
+
+
+@dataclass
+class CurrencyUpdaterActionError(Exception):
+    nested_error: str
+
+    def __str__(self):
+        return f"{self.__class__.__name__}. Nested Error: {self.nested_error}"
 
 
 class CurrencyUpdaterAction:
@@ -15,7 +23,10 @@ class CurrencyUpdaterAction:
         self.resources = resources
 
     async def get_rates(self) -> dict:
-        return await self.resources.ratejson_fxcm_service.get_rates()
+        try:
+            return await self.resources.ratejson_fxcm_service.get_rates()
+        except (ApiError, asyncio.TimeoutError) as e:
+            raise CurrencyUpdaterActionError(nested_error=str(e))
 
     async def __call__(self, symbols_assets_mapping: dict[str, FinancialAsset]):
         rates = await self.get_rates()
@@ -27,7 +38,7 @@ class CurrencyUpdaterAction:
                 await AssetHistory.add_asset(
                     self.resources.db_pool, asset.id, value, date
                 )
-        logger.info(f"currency rates updated in {date}")
+        logger.info("currency rates updated")
 
 
 class CurrencyUpdater:
@@ -38,8 +49,13 @@ class CurrencyUpdater:
         self.action = CurrencyUpdaterAction(resources)
 
     async def run(self):
+        logger.info(f"start {self.__class__.__name__}")
         target_assets = await FinancialAsset.get_assets(self.resources.db_pool)
         target_symbols = {asset.symbol: asset for asset in target_assets}
         while True:
-            await self.action(target_symbols)
+            logger.debug(f"try to get {target_symbols.keys()}")
+            try:
+                await self.action(target_symbols)
+            except CurrencyUpdaterActionError as e:
+                logger.error(e)
             await asyncio.sleep(1)

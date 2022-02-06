@@ -14,7 +14,7 @@ services:
     environment:
       - DB_URL=postgres://postgres:dbpass@db:5432/db
       - DB_URL_TEST=postgres://postgres:dbpass@db:5432/db
-      - RATEJSON_FXCM_URL=https://fake.url/
+      - RATEJSON_FXCM_URL=https://fake.url
     networks:
       - custom
     command: pytest

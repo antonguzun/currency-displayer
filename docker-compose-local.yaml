@@ -2,7 +2,7 @@ version: "3.3"
 services:
   test:
     volumes:
-      - ".:/weather"
+      - ".:/code"
     command: python3 -m http.server 6000
   db:
     ports:

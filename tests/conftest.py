@@ -8,6 +8,8 @@ from aioresponses import aioresponses
 from asyncpg import Pool
 
 from src import settings
+from src.clients import RateJsonFXCMClient
+from src.resources import Resources
 
 database_url = urlparse(settings.DB_URL_TEST)
 
@@ -70,6 +72,14 @@ async def pool(loop) -> Pool:
     await pool.close()
 
 
+@pytest.fixture()
+async def resources(pool) -> Resources:
+    session = "fake"
+    client = RateJsonFXCMClient(settings.RATEJSON_FXCM_SERVICE, session)
+    res = Resources(db_pool=pool, ratejson_fxcm_service=client, client_session=session)
+    yield res
+
+
 @pytest.fixture
 async def clean_table(loop, pool: Pool):
     await pool.execute("DELETE FROM asset_history")
@@ -79,7 +89,7 @@ async def clean_table(loop, pool: Pool):
 async def app(loop):
     from src.app import app_factory
 
-    return await app_factory()
+    return await app_factory(test=True)
 
 
 @pytest.fixture
