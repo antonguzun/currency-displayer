@@ -72,7 +72,7 @@ async def pool(loop) -> Pool:
 
 @pytest.fixture
 async def clean_table(loop, pool: Pool):
-    await pool.execute("DELETE FROM finansical_assets")
+    await pool.execute("DELETE FROM asset_history")
 
 
 @pytest.fixture

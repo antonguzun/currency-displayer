@@ -3,6 +3,7 @@ import asyncpg
 from aiohttp import web
 
 from src import settings
+from src.clients import RateJsonFXCMClient
 from src.handlers import ping
 from src.resources import Resources
 
@@ -22,8 +23,9 @@ async def setup_app_objects(app):
     app.resources = Resources(
         db_pool=pool,
         client_session=session,
-        ratejson_fxcm_service=None,  # TODO fix
-        current_currency_rates=None,
+        ratejson_fxcm_service=RateJsonFXCMClient(
+            settings.RATEJSON_FXCM_SERVICE, session
+        ),
     )
 
 
