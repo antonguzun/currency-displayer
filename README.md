@@ -5,7 +5,6 @@
 make run_tests
 ```
 
-### Если хотим работать локально
 #### создаем .env с секретами
 #### ставим зависимости:
 ```
@@ -19,17 +18,7 @@ make up_local_compose
 ```
 yoyo apply --database postgres://postgres:dbpass@0.0.0.0:5432/db ./migrations -b
 ```
-#### запуск приложения:
-```
-uvicorn src.app:create_app --host 0.0.0.0 --port 80
-```
-
 ### Создание контейнера приложения
-#### подготовка окужения:
-создаем .env с секретами и поднимаем базу:
-```
-make up_local_compose
-```
 #### сборка:
 ```
 docker build -t currency_displayer_image .
